@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
-using System.Windows.Forms;
+﻿using System.Windows.Forms;
 
 namespace WEBFill.Classes
 {
@@ -21,9 +15,9 @@ namespace WEBFill.Classes
 
         public void WebFormAuth()
         {
-            WebBrowser.Document.GetElementById("login").InnerText = "echomsk";
+            WebBrowser.Document.GetElementById("login").InnerText = "*";
             WebBrowser.Document.GetElementById("password").Focus();
-            WebBrowser.Document.GetElementById("password").InnerText = "iot77twqc5";
+            WebBrowser.Document.GetElementById("password").InnerText = "*";
             WebBrowser.Document.GetElementById("captcha-input").InnerText = Captcha;
 
             foreach (HtmlElement input in WebBrowser.Document.GetElementsByTagName("button"))
