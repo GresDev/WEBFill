@@ -135,8 +135,8 @@ namespace WEBFill.Classes
             var Clock_22 = new TimeSpan(22, 0, 0);
             var Clock_23 = new TimeSpan(23, 59, 59);
 
-            try
-            {
+            //try
+            //{
                 if (TimeSpan.Parse(_broadcast.Time) > Clock_0 & TimeSpan.Parse(_broadcast.Time) < Clock_8)
                 {
                     _broadcast.Director = Directors[DShedule[_broadcast.Date].Interval1.ToLower()];
@@ -156,17 +156,17 @@ namespace WEBFill.Classes
                 {
                     _broadcast.Director = Directors[DShedule[_broadcast.Date].Interval4.ToLower()];
                 }
-            }
-            catch (KeyNotFoundException)
-            {
-                MessageBox.Show($"Звукорежиссер для {_broadcast.Title} за {_broadcast.Date} число не найден!\n" +
-                                $"Вероятные причины:\n" +
-                                $"1. Неверно указана дата выхода программы в имени файла.\n" +
-                                "2. Незаполнено или неправильно заполнено расписание звукорежиссеров.\n" +
-                                $"3. На вкладке \"DirectorsShedule\" в фамилиях звукорежиссеров присутствуют лишние пробелы в начале и/или в конце строк.\n" + 
-                                $"4. Появился новый звукорежиссёр, ранее не указанный в перечне.");
-                Environment.Exit(-1);
-            }
+            //}
+            //catch (KeyNotFoundException)
+            //{
+            //    MessageBox.Show($"Звукорежиссер для {_broadcast.Title} за {_broadcast.Date} число не найден!\n" +
+            //                    $"Вероятные причины:\n" +
+            //                    $"1. Неверно указана дата выхода программы в имени файла.\n" +
+            //                    "2. Незаполнено или неправильно заполнено расписание звукорежиссеров.\n" +
+            //                    $"3. На вкладке \"DirectorsShedule\" в фамилиях звукорежиссеров присутствуют лишние пробелы в начале и/или в конце строк.\n" + 
+            //                    $"4. Появился новый звукорежиссёр, ранее не указанный в перечне.");
+            //    Environment.Exit(-1);
+            //}
 
             return _broadcast;
         }

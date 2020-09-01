@@ -4,10 +4,7 @@ using System.Data;
 using System.Data.OleDb;
 using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
-using WEBFill;
 //using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 
 namespace WEBFill.Classes
@@ -117,7 +114,7 @@ namespace WEBFill.Classes
 
                 broadcasts.Clear();
 
-                 
+
 
                 if (broadcastsDataReader.HasRows)
                 {
@@ -206,10 +203,10 @@ namespace WEBFill.Classes
                     //buffer = Convert.ToString(sheetDataReader.GetValue(0)).ToLower();
                     DirectorsShedule shedule = new DirectorsShedule()
                     {
-                        Interval1 = Convert.ToString(sheetDataReader.GetValue(2)),
-                        Interval2 = Convert.ToString(sheetDataReader.GetValue(3)),
-                        Interval3 = Convert.ToString(sheetDataReader.GetValue(4)),
-                        Interval4 = Convert.ToString(sheetDataReader.GetValue(5)),
+                        Interval1 = Convert.ToString(sheetDataReader.GetValue(2)).Trim(),
+                        Interval2 = Convert.ToString(sheetDataReader.GetValue(3)).Trim(),
+                        Interval3 = Convert.ToString(sheetDataReader.GetValue(4)).Trim(),
+                        Interval4 = Convert.ToString(sheetDataReader.GetValue(5)).Trim(),
                     };
                     //dictionary.Add(Convert.ToString(sheetDataReader.GetValue(0)), shedule);
                     dictionary.Add(Convert.ToDateTime(sheetDataReader.GetValue(0)).ToString("dd/MM/yyyy"), shedule);
@@ -259,7 +256,7 @@ namespace WEBFill.Classes
                 DataTable sheetAuthors = new DataTable();
                 excelDataAdapter.Fill(sheetAuthors);
 
-                var authorsDataReader = sheetAuthors.CreateDataReader();                
+                var authorsDataReader = sheetAuthors.CreateDataReader();
 
                 while (authorsDataReader.Read())
                 {
@@ -267,7 +264,7 @@ namespace WEBFill.Classes
                     {
                         Id = Convert.ToInt32(authorsDataReader.GetValue(0)),
                         NameString = Convert.ToString(authorsDataReader.GetValue(1))
-                    };                      
+                    };
                     broadcastAuthors.Add(bAuthor);
                 }
             }
@@ -293,14 +290,14 @@ namespace WEBFill.Classes
                     try
                     {
                         excelCommand.ExecuteNonQuery();
-                }
+                    }
                     catch (OleDbException)
-                {
-                    MessageBox.Show($"Ошибка при обновлении авторов в строке {bAuthor.Id}");
-                    Environment.Exit(-1);
-                }
+                    {
+                        MessageBox.Show($"Ошибка при обновлении авторов в строке {bAuthor.Id}");
+                        Environment.Exit(-1);
+                    }
 
-                i++;
+                    i++;
                 }
 
             }
