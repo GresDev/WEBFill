@@ -1,4 +1,5 @@
-﻿using System.Windows.Forms;
+﻿using System.Linq;
+using System.Windows.Forms;
 
 namespace WEBFill.Classes
 {
@@ -6,18 +7,17 @@ namespace WEBFill.Classes
     {
         public WebBrowser WebBrowser { get; set; }
         public string Captcha { get; set; }
-        public WebForm() { }
-        public WebForm(WebBrowser webBrowser, string captha)
+        public WebForm(WebBrowser webBrowser, string captcha)
         {
             WebBrowser = webBrowser;
-            Captcha = captha;
+            Captcha = captcha;
         }
 
-        public void WebFormAuth()
+        public void WebFormAuth(string login, string password)
         {
-            WebBrowser.Document.GetElementById("login").InnerText = "*";
+            WebBrowser.Document.GetElementById("login").InnerText = login;
             WebBrowser.Document.GetElementById("password").Focus();
-            WebBrowser.Document.GetElementById("password").InnerText = "*";
+            WebBrowser.Document.GetElementById("password").InnerText = password;
             WebBrowser.Document.GetElementById("captcha-input").InnerText = Captcha;
 
             foreach (HtmlElement input in WebBrowser.Document.GetElementsByTagName("button"))
@@ -27,7 +27,6 @@ namespace WEBFill.Classes
                     input.InvokeMember("click");
                 }
             }
-
             //WebBrowser.DocumentCompleted += AuthPageCompleted;
         }
 
