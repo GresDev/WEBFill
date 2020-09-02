@@ -77,10 +77,10 @@ namespace WEBFill
 ;
             LoginNotify?.Invoke();
 
-            //if (excelLoaded == true)
-            //{
-            //    startSendingButton.Enabled = true;
-            //}
+            if (excelLoaded == true)
+            {
+                //startSendingButton.Enabled = true; Не удалять!!!!
+            }
 
         }
 
@@ -95,11 +95,9 @@ namespace WEBFill
             excelLoaded = true;
             if (userLoggedIn == true)
             {
-                startSendingButton.Enabled = true;
+                //startSendingButton.Enabled = true; Не удалять!!!
             }
             createBroadcastTableButton.Enabled = true;
-            setAuthorsButton.Enabled = true;
-            startSendingButton.Enabled = true;
         }
 
         private void StartSendingButton_Click(object sender, EventArgs e)
@@ -179,14 +177,8 @@ namespace WEBFill
 
         private void CreateBroadcastTableButton_Click(object sender, EventArgs e)
         {
-            BroadcastDB broadcastTable = new BroadcastDB(ExcelInteraction.ExcelFileName, progressBar1);
+            BroadcastDb broadcastTable = new BroadcastDb(ExcelInteraction.ExcelFileName, progressBar1);
             //createBroadcastTableButton.Enabled = false;
-            //setAuthorsButton.Enabled = true;
-        }
-
-        private void SetAuthorsButton_Click(object sender, EventArgs e)
-        {
-            BroadcastDB broadcastTable = new BroadcastDB(ExcelInteraction.ExcelFileName);
         }
 
         private void reloadCaptchaButton_Click(object sender, EventArgs e)

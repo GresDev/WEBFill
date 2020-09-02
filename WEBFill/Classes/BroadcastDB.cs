@@ -1,16 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.IO;
 using System.Windows.Forms;
 
 namespace WEBFill.Classes
 {
-    class BroadcastDB
+    class BroadcastDb
     {
-        public string DBFileName { get; set; }
+        public string DbFileName { get; set; }
 
         private const string CurrentYear = "2020";
 
@@ -19,18 +16,12 @@ namespace WEBFill.Classes
         public Dictionary<string, string> Titles { get; set; }
         public Dictionary<string, string> Anons { get; set; }
         public Dictionary<string, string> Presenters { get; set; }
-        public Dictionary<string, string> Authors { get; set; }
         public Dictionary<string, string> Directors { get; set; }
-        public Dictionary<string, DirectorsShedule> DShedule { get; set; }
+        public Dictionary<string, DirectorsShedule> DirectorsSchedule { get; set; }
 
-
-        public BroadcastDB()
+        public BroadcastDb(string broadcastFileName, ProgressBar progressBar)
         {
-        }
-
-        public BroadcastDB(string BroadcastFileName, ProgressBar progressBar)
-        {
-            DBFileName = BroadcastFileName;
+            DbFileName = broadcastFileName;
 
             GetDictionaries();
 
@@ -38,36 +29,20 @@ namespace WEBFill.Classes
 
             BroadcastList = GetBroadcastList();
 
-            ExcelInteraction.BroadcastTableFill(DBFileName, BroadcastList, progressBar);
-        }
-
-        public BroadcastDB(string BroadcastFileName)
-        {
-            DBFileName = BroadcastFileName;
-
-            Presenters = ExcelInteraction.GetDictionary(DBFileName, "Presenters");
-
-            List<BroadcastAuthor> BroadcastAutorsList = ExcelInteraction.GetAuthors(BroadcastFileName);
-            List<BroadcastAuthor> BroadcastParsedAutorsList = new List<BroadcastAuthor>();
-
-            foreach (BroadcastAuthor author in BroadcastAutorsList)
-            {
-                author.NameString = ParseAuthors(author.NameString);
-                BroadcastParsedAutorsList.Add(author);
-            }
-
-            ExcelInteraction.UpdateAuthors(DBFileName, BroadcastParsedAutorsList);
-            _ = MessageBox.Show("Авторы обновлены", "Внимание!", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            ExcelInteraction.BroadcastTableFill(DbFileName, BroadcastList, progressBar);
         }
 
         private List<Broadcast> GetBroadcastList()
         {
             List<Broadcast> broadcastList = new List<Broadcast>();
+
             int i = 1;
+
             foreach (string mediaFileName in MediaFilesList)
             {
                 string[] mediaInfo = ParseFileName(mediaFileName);
 
+                mediaInfo[5] = ParsePresenters(mediaInfo[5]);
 
                 Broadcast broadcast = new Broadcast()
                 {
@@ -91,8 +66,6 @@ namespace WEBFill.Classes
                     Environment.Exit(-1);
                 }
 
-                broadcast.SetDefaultValues();
-
                 if (mediaInfo[0] == "combined")
                 {
                     broadcast.DateAiredEnd = mediaInfo[4];
@@ -109,13 +82,6 @@ namespace WEBFill.Classes
                                           mediaInfo[4];
                 }
 
-
-                if (broadcast.Author == "-")
-                {
-                    broadcast.Author = Authors[broadcast.Title.ToLower()];
-                    broadcast.Presenters = broadcast.Author;
-                }
-
                 broadcast = SetDirector(broadcast);
 
                 broadcastList.Add(broadcast);
@@ -129,103 +95,100 @@ namespace WEBFill.Classes
         {
             Broadcast _broadcast = broadcast;
 
-            var Clock_0 = new TimeSpan(0, 0, 0);
-            var Clock_8 = new TimeSpan(8, 0, 0);
-            var Clock_15 = new TimeSpan(15, 0, 0);
-            var Clock_22 = new TimeSpan(22, 0, 0);
-            var Clock_23 = new TimeSpan(23, 59, 59);
+            var clock00 = new TimeSpan(0, 0, 0);
+            var clock08 = new TimeSpan(8, 0, 0);
+            var clock15 = new TimeSpan(15, 0, 0);
+            var clock22 = new TimeSpan(22, 0, 0);
+            var clock23 = new TimeSpan(23, 59, 59);
 
-            //try
-            //{
-                if (TimeSpan.Parse(_broadcast.Time) > Clock_0 & TimeSpan.Parse(_broadcast.Time) < Clock_8)
+            try
+            {
+                if (TimeSpan.Parse(_broadcast.Time) > clock00 & TimeSpan.Parse(_broadcast.Time) < clock08)
                 {
-                    _broadcast.Director = Directors[DShedule[_broadcast.Date].Interval1.ToLower()];
+                    _broadcast.Director = Directors[DirectorsSchedule[_broadcast.Date].Interval1.ToLower()];
                 }
 
-                if (TimeSpan.Parse(_broadcast.Time) > Clock_8 & TimeSpan.Parse(_broadcast.Time) < Clock_15)
+                if (TimeSpan.Parse(_broadcast.Time) > clock08 & TimeSpan.Parse(_broadcast.Time) < clock15)
                 {
-                    _broadcast.Director = Directors[DShedule[_broadcast.Date].Interval2.ToLower()];
+                    _broadcast.Director = Directors[DirectorsSchedule[_broadcast.Date].Interval2.ToLower()];
                 }
 
-                if (TimeSpan.Parse(_broadcast.Time) > Clock_15 & TimeSpan.Parse(_broadcast.Time) < Clock_22)
+                if (TimeSpan.Parse(_broadcast.Time) > clock15 & TimeSpan.Parse(_broadcast.Time) < clock22)
                 {
-                    _broadcast.Director = Directors[DShedule[_broadcast.Date].Interval3.ToLower()];
+                    _broadcast.Director = Directors[DirectorsSchedule[_broadcast.Date].Interval3.ToLower()];
                 }
 
-                if (TimeSpan.Parse(_broadcast.Time) > Clock_22 & TimeSpan.Parse(_broadcast.Time) < Clock_23)
+                if (TimeSpan.Parse(_broadcast.Time) > clock22 & TimeSpan.Parse(_broadcast.Time) < clock23)
                 {
-                    _broadcast.Director = Directors[DShedule[_broadcast.Date].Interval4.ToLower()];
+                    _broadcast.Director = Directors[DirectorsSchedule[_broadcast.Date].Interval4.ToLower()];
                 }
-            //}
-            //catch (KeyNotFoundException)
-            //{
-            //    MessageBox.Show($"Звукорежиссер для {_broadcast.Title} за {_broadcast.Date} число не найден!\n" +
-            //                    $"Вероятные причины:\n" +
-            //                    $"1. Неверно указана дата выхода программы в имени файла.\n" +
-            //                    "2. Незаполнено или неправильно заполнено расписание звукорежиссеров.\n" +
-            //                    $"3. На вкладке \"DirectorsShedule\" в фамилиях звукорежиссеров присутствуют лишние пробелы в начале и/или в конце строк.\n" + 
-            //                    $"4. Появился новый звукорежиссёр, ранее не указанный в перечне.");
-            //    Environment.Exit(-1);
-            //}
+            }
+            catch (KeyNotFoundException)
+            {
+                MessageBox.Show($"Звукорежиссер для {_broadcast.Title} за {_broadcast.Date} число не найден!\n" +
+                                $"Вероятные причины:\n" +
+                                $"1. Неверно указана дата выхода программы в имени файла.\n" +
+                                "2. Незаполнено или неправильно заполнено расписание звукорежиссеров.\n" +
+                                $"3. Появился новый звукорежиссёр, ранее не указанный в перечне.");
+                Environment.Exit(-1);
+            }
 
             return _broadcast;
         }
 
-
         private void GetDictionaries()
         {
-            Titles = ExcelInteraction.GetDictionary(DBFileName, "Titles");
-            Anons = ExcelInteraction.GetDictionary(DBFileName, "Anons");
-            Presenters = ExcelInteraction.GetDictionary(DBFileName, "Presenters");
-            Authors = ExcelInteraction.GetDictionary(DBFileName, "Authors");
-            Directors = ExcelInteraction.GetDictionary(DBFileName, "Directors");
-            DShedule = ExcelInteraction.GetDirectorSheduleDictionary(DBFileName, "DirectorsShedule");
+            Titles = ExcelInteraction.GetDictionary(DbFileName, "Titles");
+            Anons = ExcelInteraction.GetDictionary(DbFileName, "Anons");
+            Presenters = ExcelInteraction.GetDictionary(DbFileName, "Presenters");
+            Directors = ExcelInteraction.GetDictionary(DbFileName, "Directors");
+            DirectorsSchedule = ExcelInteraction.GetDirectorSheduleDictionary(DbFileName, "DirectorsShedule");
         }
 
-        private string[] LoadMediaFilesList(string PathToFiles)
+        private string[] LoadMediaFilesList(string pathToFiles)
         {
-            string[] MediaFileList = Directory.GetFiles(PathToFiles, "*.mp3");
-            for (int i = 0; i < MediaFileList.Length; i++)
+            string[] mediaFileList = Directory.GetFiles(pathToFiles, "*.mp3");
+            for (int i = 0; i < mediaFileList.Length; i++)
             {
-                MediaFileList[i] = Path.GetFileNameWithoutExtension(MediaFileList[i]);
+                mediaFileList[i] = Path.GetFileNameWithoutExtension(mediaFileList[i]);
             }
 
-            return MediaFileList;
+            return mediaFileList;
         }
 
-        private string ParseAuthors(string AuthorsString)
+        private string ParsePresenters(string presentersString)
         {
-            string[] parsedString = AuthorsString.Split(new char[] {',', ' '});
+            string[] parsedString = presentersString.Split(new char[] { ',', ' ' });
 
-            List<string> authorsList = new List<string>();
+            List<string> presentersList = new List<string>();
 
-            foreach (string authorName in parsedString)
+            foreach (string presenterName in parsedString)
             {
-                if (Presenters.ContainsKey(authorName.ToLower()))
+                if (Presenters.ContainsKey(presenterName.ToLower()))
                 {
-                    authorsList.Add(authorName);
+                    presentersList.Add(presenterName);
                 }
                 else
                 {
-                    if (!string.IsNullOrEmpty(authorName))
+                    if (!string.IsNullOrEmpty(presenterName))
                     {
-                        MessageBox.Show($"Псевдоним \"{authorName}\" не найден в списке авторов!");
+                        MessageBox.Show($"Псевдоним \"{presenterName}\" не найден в списке авторов!");
                         Environment.Exit(0);
                     }
                 }
             }
 
 
-            string[] authorsArray = authorsList.ToArray();
+            string[] presentersArray = presentersList.ToArray();
 
-            string resultString = Presenters[authorsArray[0].ToLower()];
+            string resultString = Presenters[presentersArray[0].ToLower()];
 
             int i = 1;
-            while (i < authorsArray.Length)
+            while (i < presentersArray.Length)
             {
-                if (Presenters.ContainsKey(authorsArray[i].ToLower()))
+                if (Presenters.ContainsKey(presentersArray[i].ToLower()))
                 {
-                    resultString += ", " + Presenters[authorsArray[i].ToLower()];
+                    resultString += ", " + Presenters[presentersArray[i].ToLower()];
                 }
 
                 i++;
@@ -234,11 +197,10 @@ namespace WEBFill.Classes
             return resultString;
         }
 
-        private string[] ParseFileName(string MediaFileName)
+        private string[] ParseFileName(string mediaFileName)
         {
-            string[] parsedStringRaw = MediaFileName.Split(new char[] {' '});
+            string[] parsedStringRaw = mediaFileName.Split(new char[] { ' ' });
             string[] parsedString = new string[7];
-            //parsedString[5] = "-";
 
             int i = 1;
             parsedString[1] = parsedStringRaw[0];
@@ -253,12 +215,10 @@ namespace WEBFill.Classes
             {
                 if (parsedStringRaw[j].Contains("_"))
                 {
-                    string[] dateArray = parsedStringRaw[j].Split(new char[] {'_'});
+                    string[] dateArray = parsedStringRaw[j].Split(new char[] { '_' });
                     if (!dateArray[0].Contains("-"))
                     {
                         parsedString[0] = "single";
-
-                        //--------------
 
                         if (Int32.TryParse(dateArray[0], out int date))
                         {
@@ -272,24 +232,21 @@ namespace WEBFill.Classes
                             MessageBox.Show("Некорректная дата!");
                         }
 
-                        //--------------
-
                         parsedString[2] = dateArray[0] + "." + dateArray[1] + "." + CurrentYear;
                     }
                     else
                     {
                         parsedString[0] = "combined";
-                        string[] combinedDate = dateArray[0].Split(new char[] {'-'});
+                        string[] combinedDate = dateArray[0].Split(new char[] { '-' });
                         parsedString[2] = combinedDate[0] + "." + dateArray[1] + "." + CurrentYear;
                         parsedString[4] = combinedDate[1] + "." + dateArray[1] + "." + CurrentYear;
                     }
 
-                    string[] timeArray = parsedStringRaw[j + 1].Split(new char[] {'_'});
+                    string[] timeArray = parsedStringRaw[j + 1].Split(new char[] { '_' });
                     parsedString[3] = timeArray[0] + ":" + timeArray[1] + ":" + timeArray[2];
 
                     if (parsedStringRaw.Length > j + 2)
                     {
-                        //parsedString[5] = parsedStringRaw[j + 2];
                         for (int k = j + 2; k < parsedStringRaw.Length; k++)
                         {
                             parsedString[5] = parsedString[5] + " " + parsedStringRaw[k];
@@ -300,7 +257,7 @@ namespace WEBFill.Classes
                         parsedString[5] = "-";
                     }
 
-                    parsedString[6] = MediaFileName + ".mp3";
+                    parsedString[6] = mediaFileName + ".mp3";
 
                     break;
                 }

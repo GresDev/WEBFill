@@ -41,7 +41,6 @@
             this.labelBroadcastToSend = new System.Windows.Forms.Label();
             this.createBroadcastTableButton = new System.Windows.Forms.Button();
             this.progressBar1 = new System.Windows.Forms.ProgressBar();
-            this.setAuthorsButton = new System.Windows.Forms.Button();
             this.captchaPictureBox = new System.Windows.Forms.PictureBox();
             this.reloadCaptchaButton = new System.Windows.Forms.Button();
             this.userNameLabel = new System.Windows.Forms.Label();
@@ -165,17 +164,6 @@
             this.progressBar1.Style = System.Windows.Forms.ProgressBarStyle.Continuous;
             this.progressBar1.TabIndex = 10;
             // 
-            // setAuthorsButton
-            // 
-            this.setAuthorsButton.Enabled = false;
-            this.setAuthorsButton.Location = new System.Drawing.Point(298, 160);
-            this.setAuthorsButton.Name = "setAuthorsButton";
-            this.setAuthorsButton.Size = new System.Drawing.Size(142, 23);
-            this.setAuthorsButton.TabIndex = 11;
-            this.setAuthorsButton.Text = "Заполнить авторов";
-            this.setAuthorsButton.UseVisualStyleBackColor = true;
-            this.setAuthorsButton.Click += new System.EventHandler(this.SetAuthorsButton_Click);
-            // 
             // captchaPictureBox
             // 
             this.captchaPictureBox.Location = new System.Drawing.Point(14, 19);
@@ -276,7 +264,6 @@
             this.Controls.Add(this.labelTransmitCount);
             this.Controls.Add(this.authGroupBox);
             this.Controls.Add(this.captchaGroupBox);
-            this.Controls.Add(this.setAuthorsButton);
             this.Controls.Add(this.progressBar1);
             this.Controls.Add(this.createBroadcastTableButton);
             this.Controls.Add(this.labelBroadcastToSend);
@@ -308,7 +295,6 @@
         private System.Windows.Forms.Label labelBroadcastToSend;
         private System.Windows.Forms.Button createBroadcastTableButton;
         private System.Windows.Forms.ProgressBar progressBar1;
-        private System.Windows.Forms.Button setAuthorsButton;
         private System.Windows.Forms.PictureBox captchaPictureBox;
         private System.Windows.Forms.Button reloadCaptchaButton;
         private System.Windows.Forms.Label userNameLabel;

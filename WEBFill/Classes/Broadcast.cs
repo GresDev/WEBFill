@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Text.RegularExpressions;
-using System.Threading.Tasks;
+﻿using System.Text.RegularExpressions;
 
 namespace WEBFill.Classes
 {
@@ -29,7 +24,7 @@ namespace WEBFill.Classes
         public string Time { get; set; }
         public bool FileExists { get; set; }
 
-        public Broadcast SetDefaultValues()
+        public Broadcast()
         {
             this.DateAiredEnd = "-";
             this.Vendor = "-";
@@ -39,7 +34,6 @@ namespace WEBFill.Classes
             this.BroadcastCountryId = "Россия";
             this.Languages = "Русский";
             this.Transmitted = "0";
-            return this;
         }
 
         public string FileNameFormat()
