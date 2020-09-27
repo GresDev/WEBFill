@@ -42,6 +42,8 @@ namespace WEBFill
             {
                 LoginNotify?.Invoke();
             }
+
+            webForm = new WebForm(webBrowserGTRF, captchaTextBox.Text);
         }
 
         private void authButton_Click(object sender, EventArgs e)
@@ -86,18 +88,29 @@ namespace WEBFill
 
         private void loadFromExcelButton_Click(object sender, EventArgs e)
         {
-            broadcastsToSend = ExcelInteraction.LoadListFromExcel(openExcelFileDialog);
+            broadcastsToSend = ExcelInteraction.LoadListFromExcel(openExcelFileDialog, selectedExcelFileNameLabel);
             if (broadcastsToSend == null)
             {
-                _ = MessageBox.Show("В открытом файле нет передач, готовых к выгрузке!", "Внимание!", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
+
             excelLoaded = true;
-            if (userLoggedIn == true)
+
+            if (userLoggedIn && broadcastsToSend.Any())
             {
-                //startSendingButton.Enabled = true; Не удалять!!!
+                startSendingButton.Enabled = true;
+                createBroadcastTableButton.Enabled = false;
             }
-            createBroadcastTableButton.Enabled = true;
+
+            if (!broadcastsToSend.Any() || !userLoggedIn)
+            {
+                createBroadcastTableButton.Enabled = true;
+                startSendingButton.Enabled = false;
+            }
+
+            broadcastTotalNumberLabel.Text = broadcastsToSend.Count().ToString();
+            broadcastTransmittedNumberLabel.Text = broadcastsToSend.Count(x => x.Transmitted == "1").ToString();
+
         }
 
         private void StartSendingButton_Click(object sender, EventArgs e)
@@ -105,15 +118,21 @@ namespace WEBFill
 
             startSendingButton.Enabled = false;
             loadFromExcelButton.Enabled = false;
+            createBroadcastTableButton.Enabled = false;
+
             int i = 0;
             foreach (var broadcast in broadcastsToSend)
             {
                 if (!broadcast.FileExists)
                 {
+                    MessageBox.Show($"Отсутствует файл {broadcast.FileName} для передачи {broadcast.Title}.", "Файл не найден!", MessageBoxButtons.OK);
                     continue;
                 }
 
-                labelBroadcastToSend.Text = "Передача: " + broadcast.Title + " от " + broadcast.DateAired;
+                if (broadcast.Transmitted == "1")
+                {
+                    continue;
+                }
 
                 NewPageLoaded = false;
                 webBrowserGTRF.Navigate("http://oed.gtrf.ru/materials/edit");
@@ -161,14 +180,11 @@ namespace WEBFill
                 NewPageLoaded = false;
                 ExcelInteraction.SetTransmittedFlag(ExcelInteraction.ExcelFileName, broadcast);
                 i++;
-                labelTransmitCount.Text = "Передано " + i + " из " + broadcastsToSend.Count;
 
             }
             webBrowserGTRF.Navigate("http://oed.gtrf.ru/");
-            _ = MessageBox.Show($"Передача файлов завершена\nВсего передано выпусков программ: {i}", "Завершено!", MessageBoxButtons.OK, MessageBoxIcon.Information);
-            labelBroadcastToSend.Text = $"Передано {i} выпусков программ";
+            MessageBox.Show($"Передача файлов завершена\nВсего передано выпусков программ: {i}", "Завершено!", MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
-
 
         private void PageLoaded(Object sender, WebBrowserDocumentCompletedEventArgs e)
         {
@@ -178,7 +194,13 @@ namespace WEBFill
         private void CreateBroadcastTableButton_Click(object sender, EventArgs e)
         {
             BroadcastDb broadcastTable = new BroadcastDb(ExcelInteraction.ExcelFileName, progressBar1);
-            //createBroadcastTableButton.Enabled = false;
+            broadcastTotalNumberLabel.Text = broadcastTable.BroadcastList.Count().ToString();
+            MessageBox.Show("Таблица заполнена!", "Внимание!", MessageBoxButtons.OK, MessageBoxIcon.Information);
+
+            if (broadcastTable.BroadcastList.Any())
+            {
+                startSendingButton.Enabled = true;
+            }
         }
 
         private void reloadCaptchaButton_Click(object sender, EventArgs e)
@@ -186,7 +208,6 @@ namespace WEBFill
             captchaTextBox.Text = String.Empty;
             LoadCaptchaImage();
         }
-
 
         private void SetAuthButtonState()
         {
@@ -262,6 +283,11 @@ namespace WEBFill
             captchaTextBox.Enabled = false;
             userNameTextBox.Enabled = false;
             userPasswordTextBox.Enabled = false;
+
+        }
+
+        private void Form1_Load(object sender, EventArgs e)
+        {
 
         }
     }

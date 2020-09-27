@@ -4,7 +4,7 @@ namespace WEBFill.Classes
 {
     public class Broadcast
     {
-        public int? Id { get; set; }
+        public int Id { get; set; }
         public string Title { get; set; }
         public string DateAired { get; set; }
         public string DateAiredEnd { get; set; }
@@ -23,17 +23,18 @@ namespace WEBFill.Classes
         public string Date { get; set; }
         public string Time { get; set; }
         public bool FileExists { get; set; }
+        public string Sha256 { get; set; }
 
         public Broadcast()
         {
-            this.DateAiredEnd = "-";
-            this.Vendor = "-";
-            this.Composer = "-";
-            this.Fragments = "-";
-            this.Guests = "-";
-            this.BroadcastCountryId = "Россия";
-            this.Languages = "Русский";
-            this.Transmitted = "0";
+            DateAiredEnd = "-";
+            Vendor = "-";
+            Composer = "-";
+            Fragments = "-";
+            Guests = "-";
+            BroadcastCountryId = "Россия";
+            Languages = "Русский";
+            Transmitted = "0";
         }
 
         public string FileNameFormat()

@@ -1,5 +1,4 @@
-﻿using System.Linq;
-using System.Windows.Forms;
+﻿using System.Windows.Forms;
 
 namespace WEBFill.Classes
 {
@@ -27,45 +26,37 @@ namespace WEBFill.Classes
                     input.InvokeMember("click");
                 }
             }
-            //WebBrowser.DocumentCompleted += AuthPageCompleted;
         }
-
-        //private void AuthPageCompleted(object sender, WebBrowserDocumentCompletedEventArgs e)
-        //{
-        //    var _webBrowser = sender as WebBrowser;
-        //    _webBrowser.DocumentCompleted -= AuthPageCompleted;
-        //    _webBrowser.Navigate("http://oed.gtrf.ru/materials/edit");
-        //}
-
-        public void SendBroadcast(WebBrowser webbrowser)
-        {
-
-        }
-
-
 
 
         public void FillWebForm(WebBrowser webbrowser, Broadcast broadcast)
         {
-            webbrowser.Document.GetElementById("title").InnerText = broadcast.Title;
-            webbrowser.Document.GetElementById("date_aired").InnerText = broadcast.DateAired;
-            if (broadcast.DateAiredEnd != "-") webbrowser.Document.GetElementById("date_air_end").InnerText = broadcast.DateAiredEnd;
-            webbrowser.Document.GetElementById("vendor").InnerText = broadcast.Vendor;
-            webbrowser.Document.GetElementById("author").InnerText = broadcast.Author;
-            webbrowser.Document.GetElementById("composer").InnerText = broadcast.Composer;
-            webbrowser.Document.GetElementById("director").InnerText = broadcast.Director;
-            webbrowser.Document.GetElementById("fragments").InnerText = broadcast.Fragments;
-            webbrowser.Document.GetElementById("presenters").InnerText = broadcast.Presenters;
-            webbrowser.Document.GetElementById("guests").InnerText = broadcast.Guests;
-            if (broadcast.BroadcastCountryId != "Россия") webbrowser.Document.GetElementById("broadcast_country_id").InnerText = broadcast.BroadcastCountryId;
-            if (broadcast.Languages != "Русский") webbrowser.Document.GetElementById("languages").InnerText = broadcast.Languages;
-            webbrowser.Document.GetElementById("anons").InnerText = broadcast.Anons;
 
-            foreach (HtmlElement input in webbrowser.Document.GetElementsByTagName("button"))
+            if (webbrowser.Document != null)
             {
-                if (input.GetAttribute("InnerText") == "Сохранить")
+                webbrowser.Document.GetElementById("title").InnerText = broadcast.Title;
+                webbrowser.Document.GetElementById("date_aired").InnerText = broadcast.DateAired;
+                if (broadcast.DateAiredEnd != "-")
+                    webbrowser.Document.GetElementById("date_air_end").InnerText = broadcast.DateAiredEnd;
+                webbrowser.Document.GetElementById("vendor").InnerText = broadcast.Vendor;
+                webbrowser.Document.GetElementById("author").InnerText = broadcast.Author;
+                webbrowser.Document.GetElementById("composer").InnerText = broadcast.Composer;
+                webbrowser.Document.GetElementById("director").InnerText = broadcast.Director;
+                webbrowser.Document.GetElementById("fragments").InnerText = broadcast.Fragments;
+                webbrowser.Document.GetElementById("presenters").InnerText = broadcast.Presenters;
+                webbrowser.Document.GetElementById("guests").InnerText = broadcast.Guests;
+                if (broadcast.BroadcastCountryId != "Россия")
+                    webbrowser.Document.GetElementById("broadcast_country_id").InnerText = broadcast.BroadcastCountryId;
+                if (broadcast.Languages != "Русский")
+                    webbrowser.Document.GetElementById("languages").InnerText = broadcast.Languages;
+                webbrowser.Document.GetElementById("anons").InnerText = broadcast.Anons;
+
+                foreach (HtmlElement input in webbrowser.Document.GetElementsByTagName("button"))
                 {
-                    input.InvokeMember("click");
+                    if (input.GetAttribute("InnerText") == "Сохранить")
+                    {
+                        input.InvokeMember("click");
+                    }
                 }
             }
 
@@ -74,9 +65,5 @@ namespace WEBFill.Classes
                 Application.DoEvents();
             }
         }
-
-
-
-
     }
 }

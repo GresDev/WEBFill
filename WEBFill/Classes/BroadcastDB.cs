@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Windows.Forms;
 
@@ -63,7 +64,7 @@ namespace WEBFill.Classes
                 catch (KeyNotFoundException)
                 {
                     MessageBox.Show($"Программа \"{mediaInfo[1]}\" не найдена в перечне!");
-                    Environment.Exit(-1);
+                    Process.GetCurrentProcess().Kill();
                 }
 
                 if (mediaInfo[0] == "combined")
@@ -84,6 +85,10 @@ namespace WEBFill.Classes
 
                 broadcast = SetDirector(broadcast);
 
+                broadcast.Sha256 = Sha256.GetHash(@".\MP3\" + mediaFileName + ".mp3");
+
+
+
                 broadcastList.Add(broadcast);
                 i++;
             }
@@ -91,9 +96,9 @@ namespace WEBFill.Classes
             return broadcastList;
         }
 
-        private Broadcast SetDirector(Broadcast broadcast)
+        private Broadcast SetDirector(Broadcast bCast)
         {
-            Broadcast _broadcast = broadcast;
+            Broadcast broadCast = bCast;
 
             var clock00 = new TimeSpan(0, 0, 0);
             var clock08 = new TimeSpan(8, 0, 0);
@@ -103,37 +108,37 @@ namespace WEBFill.Classes
 
             try
             {
-                if (TimeSpan.Parse(_broadcast.Time) > clock00 & TimeSpan.Parse(_broadcast.Time) < clock08)
+                if (TimeSpan.Parse(broadCast.Time) > clock00 & TimeSpan.Parse(broadCast.Time) < clock08)
                 {
-                    _broadcast.Director = Directors[DirectorsSchedule[_broadcast.Date].Interval1.ToLower()];
+                    broadCast.Director = Directors[DirectorsSchedule[broadCast.Date].Interval1.ToLower()];
                 }
 
-                if (TimeSpan.Parse(_broadcast.Time) > clock08 & TimeSpan.Parse(_broadcast.Time) < clock15)
+                if (TimeSpan.Parse(broadCast.Time) > clock08 & TimeSpan.Parse(broadCast.Time) < clock15)
                 {
-                    _broadcast.Director = Directors[DirectorsSchedule[_broadcast.Date].Interval2.ToLower()];
+                    broadCast.Director = Directors[DirectorsSchedule[broadCast.Date].Interval2.ToLower()];
                 }
 
-                if (TimeSpan.Parse(_broadcast.Time) > clock15 & TimeSpan.Parse(_broadcast.Time) < clock22)
+                if (TimeSpan.Parse(broadCast.Time) > clock15 & TimeSpan.Parse(broadCast.Time) < clock22)
                 {
-                    _broadcast.Director = Directors[DirectorsSchedule[_broadcast.Date].Interval3.ToLower()];
+                    broadCast.Director = Directors[DirectorsSchedule[broadCast.Date].Interval3.ToLower()];
                 }
 
-                if (TimeSpan.Parse(_broadcast.Time) > clock22 & TimeSpan.Parse(_broadcast.Time) < clock23)
+                if (TimeSpan.Parse(broadCast.Time) > clock22 & TimeSpan.Parse(broadCast.Time) < clock23)
                 {
-                    _broadcast.Director = Directors[DirectorsSchedule[_broadcast.Date].Interval4.ToLower()];
+                    broadCast.Director = Directors[DirectorsSchedule[broadCast.Date].Interval4.ToLower()];
                 }
             }
             catch (KeyNotFoundException)
             {
-                MessageBox.Show($"Звукорежиссер для {_broadcast.Title} за {_broadcast.Date} число не найден!\n" +
+                MessageBox.Show($"Звукорежиссер для {broadCast.Title} за {broadCast.Date} число не найден!\n" +
                                 $"Вероятные причины:\n" +
                                 $"1. Неверно указана дата выхода программы в имени файла.\n" +
                                 "2. Незаполнено или неправильно заполнено расписание звукорежиссеров.\n" +
                                 $"3. Появился новый звукорежиссёр, ранее не указанный в перечне.");
-                Environment.Exit(-1);
+                Process.GetCurrentProcess().Kill();
             }
 
-            return _broadcast;
+            return broadCast;
         }
 
         private void GetDictionaries()
@@ -172,8 +177,8 @@ namespace WEBFill.Classes
                 {
                     if (!string.IsNullOrEmpty(presenterName))
                     {
-                        MessageBox.Show($"Псевдоним \"{presenterName}\" не найден в списке авторов!");
-                        Environment.Exit(0);
+                        MessageBox.Show($"Псевдоним \"{presenterName}\" не найден в списке авторов!", "Пропущен псевдоним!", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                        Process.GetCurrentProcess().Kill();
                     }
                 }
             }
@@ -243,6 +248,11 @@ namespace WEBFill.Classes
                     }
 
                     string[] timeArray = parsedStringRaw[j + 1].Split(new char[] { '_' });
+                    if (timeArray.Length != 3)
+                    {
+                        MessageBox.Show(mediaFileName, "Неправильный формат времени выхода передачи!", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        Process.GetCurrentProcess().Kill();
+                    }
                     parsedString[3] = timeArray[0] + ":" + timeArray[1] + ":" + timeArray[2];
 
                     if (parsedStringRaw.Length > j + 2)

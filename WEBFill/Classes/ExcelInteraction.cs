@@ -3,32 +3,32 @@ using System.Collections.Generic;
 using System.Data;
 using System.Data.OleDb;
 using System.IO;
-using System.Linq;
 using System.Windows.Forms;
-//using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 
 namespace WEBFill.Classes
 {
-    public class ExcelInteraction
+    public static class ExcelInteraction
     {
         public static string ExcelFileName { get; set; }
-        public static List<string> GetSheetsName(DataTable shemaDataTable)
+
+        public static List<string> GetSheetsName(DataTable schemaDataTable)
         {
             var sheets = new List<string>();
-            foreach (var dataRow in shemaDataTable.AsEnumerable())
+            foreach (var dataRow in schemaDataTable.AsEnumerable())
             {
                 sheets.Add(dataRow.ItemArray[2].ToString());
             }
             return sheets;
         }
 
-        public static List<Broadcast> LoadListFromExcel(OpenFileDialog openFileDialog)
+        public static List<Broadcast> LoadListFromExcel(OpenFileDialog openFileDialog, Label selectedExcelFileName)
         {
             List<Broadcast> broadcasts = new List<Broadcast>();
             string connectionString;
-            //string excelFileName;
             string mp3Directory = @".\mp3\";
-            openFileDialog.FileName = "";
+
+            //openFileDialog.FileName = "";
+
             if (openFileDialog.ShowDialog() == DialogResult.OK)
             {
                 ExcelFileName = openFileDialog.FileName;
@@ -46,7 +46,7 @@ namespace WEBFill.Classes
                     //connectionString = $"Provider=Microsoft.Jet.OLEDB.4.0; Data Source={excelFileName}; Extended Properties=\"Excel 8.0; HDR=YES; IMEX=1\"";
                     break;
                 default:
-                    _ = MessageBox.Show("Выберите файл Excel!", "Внимание!", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    MessageBox.Show("Выберите файл Excel!", "Внимание!", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                     return null;
             }
 
@@ -56,13 +56,13 @@ namespace WEBFill.Classes
             {
                 excelConnection.Open();
                 DataTable dtShema = excelConnection.GetOleDbSchemaTable(OleDbSchemaGuid.Tables, null);
-                List<string> SheetNames = ExcelInteraction.GetSheetsName(dtShema);
+                List<string> sheetNames = ExcelInteraction.GetSheetsName(dtShema);
 
-                if (!SheetNames.Contains("Broadcasts$"))
+                if (!sheetNames.Contains("Broadcasts$"))
                 {
-                    _ = MessageBox.Show("Выбранный файл не содержит лист \"Broadcasts\"\nc данными о передаваемых передачах!", "Внимание!", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    MessageBox.Show("Выбранный файл не содержит лист \"Broadcasts\"\nc данными о передаваемых передачах!", "Внимание!", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                     return null;
-                };
+                }
 
                 OleDbCommand excelCommand = new OleDbCommand(excelQuery, excelConnection);
                 OleDbDataAdapter excelDataAdapter = new OleDbDataAdapter(excelCommand);
@@ -72,49 +72,7 @@ namespace WEBFill.Classes
 
                 var broadcastsDataReader = sheetBroadcasts.CreateDataReader();
 
-                //--------------------------------------------------------
-
-                excelQuery = "SELECT * FROM [Directors$]";
-                excelCommand = new OleDbCommand(excelQuery, excelConnection);
-                excelDataAdapter = new OleDbDataAdapter(excelCommand);
-
-                DataTable sheetDirectors = new DataTable();
-                excelDataAdapter.Fill(sheetDirectors);
-
-                var directorsDataReader = sheetDirectors.CreateDataReader();
-
-                Dictionary<string, string> directors = new Dictionary<string, string>();
-
-                while (directorsDataReader.Read())
-                {
-                    directors.Add(Convert.ToString(directorsDataReader.GetValue(0)).ToUpper(), Convert.ToString(directorsDataReader.GetValue(1)));
-                }
-
-                //--------------------------------------------------------
-
-                excelQuery = "SELECT * FROM [Presenters$]";
-                excelCommand = new OleDbCommand(excelQuery, excelConnection);
-                excelDataAdapter = new OleDbDataAdapter(excelCommand);
-
-                DataTable sheetPresenters = new DataTable();
-                excelDataAdapter.Fill(sheetPresenters);
-
-                var presentersDataReader = sheetPresenters.CreateDataReader();
-
-                Dictionary<string, string> presenters = new Dictionary<string, string>();
-
-                while (presentersDataReader.Read())
-                {
-                    presenters.Add(Convert.ToString(presentersDataReader.GetValue(0)).ToUpper(), Convert.ToString(presentersDataReader.GetValue(1)));
-                }
-
-
-                //--------------------------------------------------------
-
-
-                broadcasts.Clear();
-
-
+                //broadcasts.Clear();
 
                 if (broadcastsDataReader.HasRows)
                 {
@@ -122,47 +80,50 @@ namespace WEBFill.Classes
                     {
                         object[] items = new object[broadcastsDataReader.FieldCount];
                         broadcastsDataReader.GetValues(items);
-                        if (Convert.ToString(items[15]) == "0")
+                        //if (Convert.ToString(items[15]) == "0")
+                        //{
+                        Broadcast broadcast = new Broadcast
                         {
-                            Broadcast broadcast = new Broadcast
-                            {
-                                Id = Convert.ToInt16(items[0]),
-                                Title = Convert.ToString(items[1]),
-                                DateAired = Convert.ToString(items[2]),
-                                DateAiredEnd = Convert.ToString(items[3]),
-                                Vendor = Convert.ToString(items[4]),
-                                Author = Convert.ToString(items[5]),
-                                Composer = Convert.ToString(items[6]),
-                                Director = Convert.ToString(items[7]),
-                                Fragments = Convert.ToString(items[8]),
-                                Presenters = Convert.ToString(items[9]),
-                                Guests = Convert.ToString(items[10]),
-                                BroadcastCountryId = Convert.ToString(items[11]),
-                                Languages = Convert.ToString(items[12]),
-                                Anons = Convert.ToString(items[13]),
-                                FileName = Convert.ToString(items[14]),
-                                Transmitted = Convert.ToString(items[15]),
-                            };
-                            broadcast.FileExists = true;
-                            if (!File.Exists(mp3Directory + broadcast.FileName))
-                            {
-                                _ = MessageBox.Show($"Файл \"{broadcast.FileName}\" не найден!", "Внимание!", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                                broadcast.FileExists = false;
-                            }
-                            //broadcast.Director = directors[(broadcast.Director).ToUpper()];
-                            broadcasts.Add(broadcast);
+                            Id = Convert.ToInt16(items[0]),
+                            Title = Convert.ToString(items[1]),
+                            DateAired = Convert.ToString(items[2]),
+                            DateAiredEnd = Convert.ToString(items[3]),
+                            Vendor = Convert.ToString(items[4]),
+                            Author = Convert.ToString(items[5]),
+                            Composer = Convert.ToString(items[6]),
+                            Director = Convert.ToString(items[7]),
+                            Fragments = Convert.ToString(items[8]),
+                            Presenters = Convert.ToString(items[9]),
+                            Guests = Convert.ToString(items[10]),
+                            BroadcastCountryId = Convert.ToString(items[11]),
+                            Languages = Convert.ToString(items[12]),
+                            Anons = Convert.ToString(items[13]),
+                            FileName = Convert.ToString(items[14]),
+                            Transmitted = Convert.ToString(items[15]),
+                        };
+                        broadcast.FileExists = true;
+                        if (!File.Exists(mp3Directory + broadcast.FileName))
+                        {
+                            MessageBox.Show($"Файл \"{broadcast.FileName}\" не найден!", "Внимание!", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                            broadcast.FileExists = false;
                         }
+
+                        broadcasts.Add(broadcast);
+                        //}
                     }
                 }
             }
+
+            selectedExcelFileName.Text = Path.GetFileName(ExcelFileName);
+
             return broadcasts;
         }
 
-        public static Dictionary<string, string> GetDictionary(string BroadcastFileName, string TableName)
+        public static Dictionary<string, string> GetDictionary(string broadcastFileName, string tableName)
         {
             Dictionary<string, string> dictionary = new Dictionary<string, string>();
-            string connectionString = $"Provider=Microsoft.ACE.OLEDB.12.0; Data Source={BroadcastFileName}; Extended Properties=\"Excel 12.0 Xml; HDR=YES; IMEX=1;\"";
-            string excelQuery = $"SELECT * FROM [{TableName}$]";
+            string connectionString = $"Provider=Microsoft.ACE.OLEDB.12.0; Data Source={broadcastFileName}; Extended Properties=\"Excel 12.0 Xml; HDR=YES; IMEX=1;\"";
+            string excelQuery = $"SELECT * FROM [{tableName}$]";
             //string buffer;
             using (OleDbConnection excelConnection = new OleDbConnection(connectionString))
             {
@@ -183,11 +144,11 @@ namespace WEBFill.Classes
             return dictionary;
         }
 
-        public static Dictionary<string, DirectorsShedule> GetDirectorSheduleDictionary(string BroadcastFileName, string TableName)
+        public static Dictionary<string, DirectorsShedule> GetDirectorSheduleDictionary(string broadcastFileName, string tableName)
         {
             Dictionary<string, DirectorsShedule> dictionary = new Dictionary<string, DirectorsShedule>();
-            string connectionString = $"Provider=Microsoft.ACE.OLEDB.12.0; Data Source={BroadcastFileName}; Extended Properties=\"Excel 12.0 Xml; HDR=YES; IMEX=1;\"";
-            string excelQuery = $"SELECT * FROM [{TableName}$]";
+            string connectionString = $"Provider=Microsoft.ACE.OLEDB.12.0; Data Source={broadcastFileName}; Extended Properties=\"Excel 12.0 Xml; HDR=YES; IMEX=1;\"";
+            string excelQuery = $"SELECT * FROM [{tableName}$]";
             //string buffer;
             using (OleDbConnection excelConnection = new OleDbConnection(connectionString))
             {
@@ -216,7 +177,7 @@ namespace WEBFill.Classes
             return dictionary;
         }
 
-        public static void BroadcastTableFill(string excelFileName, List<Broadcast> BroadcastList, ProgressBar progressBar)
+        public static void BroadcastTableFill(string excelFileName, List<Broadcast> broadcastList, ProgressBar progressBar)
         {
 
             string connectionString = $"Provider=Microsoft.ACE.OLEDB.12.0; Data Source={excelFileName}; Extended Properties=\"Excel 12.0 Xml; HDR=YES; IMEX=3;\"";
@@ -228,16 +189,15 @@ namespace WEBFill.Classes
 
                 int i = 0;
 
-                foreach (Broadcast broadcast in BroadcastList)
+                foreach (Broadcast broadcast in broadcastList)
                 {
-                    excelQuery = $"INSERT INTO [Broadcasts$] (Id, Title, DateAired, DateAiredEnd, Vendor, Author, Composer, Director, Fragments, Presenters, Guests, BroadcastCountryId, Languages, Anons, FileName, Transmitted, [Date], [Time]) values ({broadcast.Id}, '{broadcast.Title}', '{broadcast.DateAired}', '{broadcast.DateAiredEnd}', '{broadcast.Vendor}', '{broadcast.Author}', '{broadcast.Composer}', '{broadcast.Director}', '{broadcast.Fragments}', '{broadcast.Presenters}', '{broadcast.Guests}', '{broadcast.BroadcastCountryId}', '{broadcast.Languages}', '{broadcast.Anons}', '{broadcast.FileName}', '{broadcast.Transmitted}', '{broadcast.Date}', '{broadcast.Time}')";
+                    excelQuery = $"INSERT INTO [Broadcasts$] (Id, Title, DateAired, DateAiredEnd, Vendor, Author, Composer, Director, Fragments, Presenters, Guests, BroadcastCountryId, Languages, Anons, FileName, Transmitted, [Date], [Time], SHA256) values ({broadcast.Id}, '{broadcast.Title}', '{broadcast.DateAired}', '{broadcast.DateAiredEnd}', '{broadcast.Vendor}', '{broadcast.Author}', '{broadcast.Composer}', '{broadcast.Director}', '{broadcast.Fragments}', '{broadcast.Presenters}', '{broadcast.Guests}', '{broadcast.BroadcastCountryId}', '{broadcast.Languages}', '{broadcast.Anons}', '{broadcast.FileName}', '{broadcast.Transmitted}', '{broadcast.Date}', '{broadcast.Time}', '{broadcast.Sha256}')";
                     OleDbCommand excelCommand = new OleDbCommand(excelQuery, excelConnection);
                     excelCommand.ExecuteNonQuery();
                     i++;
-                    progressBar.Value = (i * 100) / BroadcastList.Count;
+                    progressBar.Value = (i * 100) / broadcastList.Count;
                 }
             }
-            _ = MessageBox.Show("Таблица заполнена!", "Внимание!", MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
 
         public static List<BroadcastAuthor> GetAuthors(string excelFileName)
@@ -272,7 +232,7 @@ namespace WEBFill.Classes
             return broadcastAuthors;
         }
 
-        public static void UpdateAuthors(string excelFileName, List<BroadcastAuthor> BroadcastAutorsList)
+        public static void UpdateAuthors(string excelFileName, List<BroadcastAuthor> broadcastAutorsList)
         {
             string connectionString = $"Provider=Microsoft.ACE.OLEDB.12.0; Data Source={excelFileName}; Extended Properties=\"Excel 12.0 Xml; HDR=YES; IMEX=3;\"";
             string excelQuery;
@@ -281,9 +241,7 @@ namespace WEBFill.Classes
             {
                 excelConnection.Open();
 
-                int i = 0;
-
-                foreach (BroadcastAuthor bAuthor in BroadcastAutorsList)
+                foreach (BroadcastAuthor bAuthor in broadcastAutorsList)
                 {
                     excelQuery = $"UPDATE [Broadcasts$] SET Author = '{bAuthor.NameString}', Presenters = '{bAuthor.NameString}' WHERE Id = '{bAuthor.Id}'";
                     OleDbCommand excelCommand = new OleDbCommand(excelQuery, excelConnection);
@@ -297,7 +255,6 @@ namespace WEBFill.Classes
                         Environment.Exit(-1);
                     }
 
-                    i++;
                 }
 
             }
