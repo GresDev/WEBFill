@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Data.OleDb;
 using System.IO;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace WEBFill.Classes
@@ -21,7 +22,8 @@ namespace WEBFill.Classes
             return sheets;
         }
 
-        public static List<Broadcast> LoadListFromExcel(OpenFileDialog openFileDialog, Label selectedExcelFileName)
+        
+        public static async Task<List<Broadcast>> LoadListFromExcelAsync(OpenFileDialog openFileDialog, Label selectedExcelFileName)
         {
             List<Broadcast> broadcasts = new List<Broadcast>();
             string connectionString;
@@ -54,7 +56,7 @@ namespace WEBFill.Classes
 
             using (OleDbConnection excelConnection = new OleDbConnection(connectionString))
             {
-                excelConnection.Open();
+                await excelConnection.OpenAsync();
                 DataTable dtShema = excelConnection.GetOleDbSchemaTable(OleDbSchemaGuid.Tables, null);
                 List<string> sheetNames = ExcelInteraction.GetSheetsName(dtShema);
 
@@ -76,7 +78,7 @@ namespace WEBFill.Classes
 
                 if (broadcastsDataReader.HasRows)
                 {
-                    while (broadcastsDataReader.Read())
+                    while (await broadcastsDataReader.ReadAsync())
                     {
                         object[] items = new object[broadcastsDataReader.FieldCount];
                         broadcastsDataReader.GetValues(items);
@@ -119,7 +121,7 @@ namespace WEBFill.Classes
             return broadcasts;
         }
 
-        public static Dictionary<string, string> GetDictionary(string broadcastFileName, string tableName)
+        public static async Task<Dictionary<string, string>> GetDictionaryAsync(string broadcastFileName, string tableName)
         {
             Dictionary<string, string> dictionary = new Dictionary<string, string>();
             string connectionString = $"Provider=Microsoft.ACE.OLEDB.12.0; Data Source={broadcastFileName}; Extended Properties=\"Excel 12.0 Xml; HDR=YES; IMEX=1;\"";
@@ -127,14 +129,14 @@ namespace WEBFill.Classes
             //string buffer;
             using (OleDbConnection excelConnection = new OleDbConnection(connectionString))
             {
-                excelConnection.Open();
+                await excelConnection.OpenAsync();
                 OleDbCommand excelCommand = new OleDbCommand(excelQuery, excelConnection);
                 OleDbDataAdapter dataAdapter = new OleDbDataAdapter(excelCommand);
                 DataTable excelSheet = new DataTable();
                 dataAdapter.Fill(excelSheet);
                 var sheetDataReader = excelSheet.CreateDataReader();
 
-                while (sheetDataReader.Read())
+                while (await sheetDataReader.ReadAsync())
                 {
                     //buffer = Convert.ToString(sheetDataReader.GetValue(0)).ToLower();
                     dictionary.Add(Convert.ToString(sheetDataReader.GetValue(0)).ToLower(), Convert.ToString(sheetDataReader.GetValue(1)));
@@ -144,7 +146,7 @@ namespace WEBFill.Classes
             return dictionary;
         }
 
-        public static Dictionary<string, DirectorsShedule> GetDirectorSheduleDictionary(string broadcastFileName, string tableName)
+        public static async Task<Dictionary<string, DirectorsShedule>> GetDirectorSheduleDictionaryAsync(string broadcastFileName, string tableName)
         {
             Dictionary<string, DirectorsShedule> dictionary = new Dictionary<string, DirectorsShedule>();
             string connectionString = $"Provider=Microsoft.ACE.OLEDB.12.0; Data Source={broadcastFileName}; Extended Properties=\"Excel 12.0 Xml; HDR=YES; IMEX=1;\"";
@@ -152,14 +154,14 @@ namespace WEBFill.Classes
             //string buffer;
             using (OleDbConnection excelConnection = new OleDbConnection(connectionString))
             {
-                excelConnection.Open();
+                await excelConnection.OpenAsync();
                 OleDbCommand excelCommand = new OleDbCommand(excelQuery, excelConnection);
                 OleDbDataAdapter dataAdapter = new OleDbDataAdapter(excelCommand);
                 DataTable excelSheet = new DataTable();
                 dataAdapter.Fill(excelSheet);
                 var sheetDataReader = excelSheet.CreateDataReader();
 
-                while (sheetDataReader.Read())
+                while (await sheetDataReader.ReadAsync())
                 {
                     //buffer = Convert.ToString(sheetDataReader.GetValue(0)).ToLower();
                     DirectorsShedule shedule = new DirectorsShedule()
@@ -177,86 +179,19 @@ namespace WEBFill.Classes
             return dictionary;
         }
 
-        public static void BroadcastTableFill(string excelFileName, List<Broadcast> broadcastList, ProgressBar progressBar)
+        public static async Task WriteBroadcastToTableAsync(Broadcast broadcast)
         {
 
-            string connectionString = $"Provider=Microsoft.ACE.OLEDB.12.0; Data Source={excelFileName}; Extended Properties=\"Excel 12.0 Xml; HDR=YES; IMEX=3;\"";
+            string connectionString = $"Provider=Microsoft.ACE.OLEDB.12.0; Data Source={ExcelFileName}; Extended Properties=\"Excel 12.0 Xml; HDR=YES; IMEX=3;\"";
             string excelQuery;
 
             using (OleDbConnection excelConnection = new OleDbConnection(connectionString))
             {
-                excelConnection.Open();
+                await excelConnection.OpenAsync();
 
-                int i = 0;
-
-                foreach (Broadcast broadcast in broadcastList)
-                {
-                    excelQuery = $"INSERT INTO [Broadcasts$] (Id, Title, DateAired, DateAiredEnd, Vendor, Author, Composer, Director, Fragments, Presenters, Guests, BroadcastCountryId, Languages, Anons, FileName, Transmitted, [Date], [Time], SHA256) values ({broadcast.Id}, '{broadcast.Title}', '{broadcast.DateAired}', '{broadcast.DateAiredEnd}', '{broadcast.Vendor}', '{broadcast.Author}', '{broadcast.Composer}', '{broadcast.Director}', '{broadcast.Fragments}', '{broadcast.Presenters}', '{broadcast.Guests}', '{broadcast.BroadcastCountryId}', '{broadcast.Languages}', '{broadcast.Anons}', '{broadcast.FileName}', '{broadcast.Transmitted}', '{broadcast.Date}', '{broadcast.Time}', '{broadcast.Sha256}')";
-                    OleDbCommand excelCommand = new OleDbCommand(excelQuery, excelConnection);
-                    excelCommand.ExecuteNonQuery();
-                    i++;
-                    progressBar.Value = (i * 100) / broadcastList.Count;
-                }
-            }
-        }
-
-        public static List<BroadcastAuthor> GetAuthors(string excelFileName)
-        {
-            string connectionString = $"Provider=Microsoft.ACE.OLEDB.12.0; Data Source={excelFileName}; Extended Properties=\"Excel 12.0 Xml; HDR=YES; IMEX=3;\"";
-            string excelQuery;
-            List<BroadcastAuthor> broadcastAuthors = new List<BroadcastAuthor>();
-
-            using (OleDbConnection excelConnection = new OleDbConnection(connectionString))
-            {
-                excelConnection.Open();
-                excelQuery = "SELECT Id, Author FROM [Broadcasts$]";
+                excelQuery = $"INSERT INTO [Broadcasts$] (Id, Title, DateAired, DateAiredEnd, Vendor, Author, Composer, Director, Fragments, Presenters, Guests, BroadcastCountryId, Languages, Anons, FileName, Transmitted, [Date], [Time], SHA256) values ({broadcast.Id}, '{broadcast.Title}', '{broadcast.DateAired}', '{broadcast.DateAiredEnd}', '{broadcast.Vendor}', '{broadcast.Author}', '{broadcast.Composer}', '{broadcast.Director}', '{broadcast.Fragments}', '{broadcast.Presenters}', '{broadcast.Guests}', '{broadcast.BroadcastCountryId}', '{broadcast.Languages}', '{broadcast.Anons}', '{broadcast.FileName}', '{broadcast.Transmitted}', '{broadcast.Date}', '{broadcast.Time}', '{broadcast.Sha256}')";
                 OleDbCommand excelCommand = new OleDbCommand(excelQuery, excelConnection);
-                OleDbDataAdapter excelDataAdapter = new OleDbDataAdapter(excelCommand);
-
-                DataTable sheetAuthors = new DataTable();
-                excelDataAdapter.Fill(sheetAuthors);
-
-                var authorsDataReader = sheetAuthors.CreateDataReader();
-
-                while (authorsDataReader.Read())
-                {
-                    BroadcastAuthor bAuthor = new BroadcastAuthor
-                    {
-                        Id = Convert.ToInt32(authorsDataReader.GetValue(0)),
-                        NameString = Convert.ToString(authorsDataReader.GetValue(1))
-                    };
-                    broadcastAuthors.Add(bAuthor);
-                }
-            }
-
-            return broadcastAuthors;
-        }
-
-        public static void UpdateAuthors(string excelFileName, List<BroadcastAuthor> broadcastAutorsList)
-        {
-            string connectionString = $"Provider=Microsoft.ACE.OLEDB.12.0; Data Source={excelFileName}; Extended Properties=\"Excel 12.0 Xml; HDR=YES; IMEX=3;\"";
-            string excelQuery;
-
-            using (OleDbConnection excelConnection = new OleDbConnection(connectionString))
-            {
-                excelConnection.Open();
-
-                foreach (BroadcastAuthor bAuthor in broadcastAutorsList)
-                {
-                    excelQuery = $"UPDATE [Broadcasts$] SET Author = '{bAuthor.NameString}', Presenters = '{bAuthor.NameString}' WHERE Id = '{bAuthor.Id}'";
-                    OleDbCommand excelCommand = new OleDbCommand(excelQuery, excelConnection);
-                    try
-                    {
-                        excelCommand.ExecuteNonQuery();
-                    }
-                    catch (OleDbException)
-                    {
-                        MessageBox.Show($"Ошибка при обновлении авторов в строке {bAuthor.Id}");
-                        Environment.Exit(-1);
-                    }
-
-                }
-
+                await excelCommand.ExecuteNonQueryAsync();
             }
         }
 

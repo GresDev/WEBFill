@@ -38,7 +38,7 @@
             this.webBrowserGTRF = new System.Windows.Forms.WebBrowser();
             this.startSendingButton = new System.Windows.Forms.Button();
             this.createBroadcastTableButton = new System.Windows.Forms.Button();
-            this.progressBar1 = new System.Windows.Forms.ProgressBar();
+            this.progressBar = new System.Windows.Forms.ProgressBar();
             this.captchaPictureBox = new System.Windows.Forms.PictureBox();
             this.reloadCaptchaButton = new System.Windows.Forms.Button();
             this.userNameLabel = new System.Windows.Forms.Label();
@@ -50,10 +50,10 @@
             this.label2 = new System.Windows.Forms.Label();
             this.label3 = new System.Windows.Forms.Label();
             this.label4 = new System.Windows.Forms.Label();
-            this.listView1 = new System.Windows.Forms.ListView();
             this.selectedExcelFileNameLabel = new System.Windows.Forms.Label();
             this.broadcastTotalNumberLabel = new System.Windows.Forms.Label();
             this.broadcastTransmittedNumberLabel = new System.Windows.Forms.Label();
+            this.richTextBox1 = new System.Windows.Forms.RichTextBox();
             ((System.ComponentModel.ISupportInitialize)(this.bindingSource1)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.captchaPictureBox)).BeginInit();
             this.captchaGroupBox.SuspendLayout();
@@ -66,7 +66,7 @@
             this.captchaTextBox.Name = "captchaTextBox";
             this.captchaTextBox.Size = new System.Drawing.Size(227, 20);
             this.captchaTextBox.TabIndex = 1;
-            this.captchaTextBox.TextChanged += new System.EventHandler(this.captchaTextBox_TextChanged);
+            this.captchaTextBox.TextChanged += new System.EventHandler(this.CaptchaTextBox_TextChanged);
             // 
             // authButton
             // 
@@ -77,7 +77,7 @@
             this.authButton.TabIndex = 1;
             this.authButton.Text = "Подключиться";
             this.authButton.UseVisualStyleBackColor = true;
-            this.authButton.Click += new System.EventHandler(this.authButton_Click);
+            this.authButton.Click += new System.EventHandler(this.AuthButton_Click);
             // 
             // label1
             // 
@@ -96,7 +96,7 @@
             this.loadFromExcelButton.TabIndex = 5;
             this.loadFromExcelButton.Text = "Выбрать таблицу передач";
             this.loadFromExcelButton.UseVisualStyleBackColor = true;
-            this.loadFromExcelButton.Click += new System.EventHandler(this.loadFromExcelButton_Click);
+            this.loadFromExcelButton.Click += new System.EventHandler(this.LoadFromExcelButton_Click);
             // 
             // openExcelFileDialog
             // 
@@ -136,15 +136,15 @@
             this.createBroadcastTableButton.UseVisualStyleBackColor = true;
             this.createBroadcastTableButton.Click += new System.EventHandler(this.CreateBroadcastTableButton_Click);
             // 
-            // progressBar1
+            // progressBar
             // 
-            this.progressBar1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.progressBar1.Location = new System.Drawing.Point(289, 349);
-            this.progressBar1.Name = "progressBar1";
-            this.progressBar1.Size = new System.Drawing.Size(515, 23);
-            this.progressBar1.Step = 1;
-            this.progressBar1.Style = System.Windows.Forms.ProgressBarStyle.Continuous;
-            this.progressBar1.TabIndex = 10;
+            this.progressBar.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.progressBar.Location = new System.Drawing.Point(289, 349);
+            this.progressBar.Name = "progressBar";
+            this.progressBar.Size = new System.Drawing.Size(515, 23);
+            this.progressBar.Step = 1;
+            this.progressBar.Style = System.Windows.Forms.ProgressBarStyle.Continuous;
+            this.progressBar.TabIndex = 10;
             // 
             // captchaPictureBox
             // 
@@ -163,7 +163,7 @@
             this.reloadCaptchaButton.TabIndex = 13;
             this.reloadCaptchaButton.Text = "Перезагрузить картинку";
             this.reloadCaptchaButton.UseVisualStyleBackColor = true;
-            this.reloadCaptchaButton.Click += new System.EventHandler(this.reloadCaptchaButton_Click);
+            this.reloadCaptchaButton.Click += new System.EventHandler(this.ReloadCaptchaButton_Click);
             // 
             // userNameLabel
             // 
@@ -218,7 +218,7 @@
             this.userPasswordTextBox.PasswordChar = '*';
             this.userPasswordTextBox.Size = new System.Drawing.Size(227, 20);
             this.userPasswordTextBox.TabIndex = 17;
-            this.userPasswordTextBox.TextChanged += new System.EventHandler(this.userPasswordTextBox_TextChanged);
+            this.userPasswordTextBox.TextChanged += new System.EventHandler(this.UserPasswordTextBox_TextChanged);
             // 
             // userNameTextBox
             // 
@@ -226,7 +226,7 @@
             this.userNameTextBox.Name = "userNameTextBox";
             this.userNameTextBox.Size = new System.Drawing.Size(227, 20);
             this.userNameTextBox.TabIndex = 16;
-            this.userNameTextBox.TextChanged += new System.EventHandler(this.userNameTextBox_TextChanged);
+            this.userNameTextBox.TextChanged += new System.EventHandler(this.UserNameTextBox_TextChanged);
             // 
             // label2
             // 
@@ -254,15 +254,6 @@
             this.label4.Size = new System.Drawing.Size(158, 13);
             this.label4.TabIndex = 21;
             this.label4.Text = "Выбранная таблица передач: ";
-            // 
-            // listView1
-            // 
-            this.listView1.HideSelection = false;
-            this.listView1.Location = new System.Drawing.Point(291, 31);
-            this.listView1.Name = "listView1";
-            this.listView1.Size = new System.Drawing.Size(513, 152);
-            this.listView1.TabIndex = 22;
-            this.listView1.UseCompatibleStateImageBehavior = false;
             // 
             // selectedExcelFileNameLabel
             // 
@@ -292,21 +283,29 @@
             this.broadcastTransmittedNumberLabel.TabIndex = 25;
             this.broadcastTransmittedNumberLabel.Text = "-";
             // 
+            // richTextBox1
+            // 
+            this.richTextBox1.Location = new System.Drawing.Point(291, 31);
+            this.richTextBox1.Name = "richTextBox1";
+            this.richTextBox1.Size = new System.Drawing.Size(513, 167);
+            this.richTextBox1.TabIndex = 26;
+            this.richTextBox1.Text = "";
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(829, 392);
+            this.Controls.Add(this.richTextBox1);
             this.Controls.Add(this.broadcastTransmittedNumberLabel);
             this.Controls.Add(this.broadcastTotalNumberLabel);
             this.Controls.Add(this.selectedExcelFileNameLabel);
-            this.Controls.Add(this.listView1);
             this.Controls.Add(this.label4);
             this.Controls.Add(this.label3);
             this.Controls.Add(this.label2);
             this.Controls.Add(this.authGroupBox);
             this.Controls.Add(this.captchaGroupBox);
-            this.Controls.Add(this.progressBar1);
+            this.Controls.Add(this.progressBar);
             this.Controls.Add(this.createBroadcastTableButton);
             this.Controls.Add(this.startSendingButton);
             this.Controls.Add(this.loadFromExcelButton);
@@ -334,7 +333,7 @@
         private System.Windows.Forms.WebBrowser webBrowserGTRF;
         private System.Windows.Forms.Button startSendingButton;
         private System.Windows.Forms.Button createBroadcastTableButton;
-        private System.Windows.Forms.ProgressBar progressBar1;
+        private System.Windows.Forms.ProgressBar progressBar;
         private System.Windows.Forms.PictureBox captchaPictureBox;
         private System.Windows.Forms.Button reloadCaptchaButton;
         private System.Windows.Forms.Label userNameLabel;
@@ -346,10 +345,10 @@
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.Label label3;
         private System.Windows.Forms.Label label4;
-        private System.Windows.Forms.ListView listView1;
         private System.Windows.Forms.Label selectedExcelFileNameLabel;
         private System.Windows.Forms.Label broadcastTotalNumberLabel;
         private System.Windows.Forms.Label broadcastTransmittedNumberLabel;
+        private System.Windows.Forms.RichTextBox richTextBox1;
     }
 }
 

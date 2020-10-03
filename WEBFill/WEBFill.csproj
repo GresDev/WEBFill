@@ -66,8 +66,6 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Classes\Broadcast.cs" />
-    <Compile Include="Classes\BroadcastAuthor.cs" />
-    <Compile Include="Classes\BroadcastDB.cs" />
     <Compile Include="Classes\DirectorsShedule.cs" />
     <Compile Include="Classes\ExcelInteraction.cs" />
     <Compile Include="Classes\Sha256.cs" />
