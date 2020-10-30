@@ -6,6 +6,11 @@ namespace WEBFill.Classes
 {
     public static class Sha256
     {
+        /// <summary>
+        /// Возвращает хэш-значение для загружаемого файла .mp3
+        /// </summary>
+        /// <param name="fileName"></param>
+        /// <returns></returns>
         public static string GetHash(string fileName)
         {
             using (FileStream stream = File.OpenRead(fileName))

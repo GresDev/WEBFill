@@ -1,57 +1,69 @@
-﻿using System.Windows.Forms;
+﻿using System;
+using System.Linq;
+using System.Windows.Forms;
 
 namespace WEBFill.Classes
 {
-    public class WebForm
+    public static class WebForm
     {
-        public WebBrowser WebBrowser { get; set; }
-        public string Captcha { get; set; }
-        public WebForm(WebBrowser webBrowser, string captcha)
+        /// <summary>
+        /// Аутентификация на сайте http://oed.gtrf.ru/
+        /// </summary>
+        /// <param name="webBrowser"></param>
+        /// <param name="login"></param>
+        /// <param name="password"></param>
+        /// <param name="captcha"></param>
+        public static void WebFormAuth(WebBrowser webBrowser, string login, string password, string captcha)
         {
-            WebBrowser = webBrowser;
-            Captcha = captcha;
-        }
-
-        public void WebFormAuth(string login, string password)
-        {
-            WebBrowser.Document.GetElementById("login").InnerText = login;
-            WebBrowser.Document.GetElementById("password").Focus();
-            WebBrowser.Document.GetElementById("password").InnerText = password;
-            WebBrowser.Document.GetElementById("captcha-input").InnerText = Captcha;
-
-            foreach (HtmlElement input in WebBrowser.Document.GetElementsByTagName("button"))
+            try
             {
-                if (input.GetAttribute("InnerText") == "Войти")
+                webBrowser.Document.GetElementById("login").InnerText = login;
+                webBrowser.Document.GetElementById("password").Focus();
+                webBrowser.Document.GetElementById("password").InnerText = password;
+                webBrowser.Document.GetElementById("captcha-input").InnerText = captcha;
+
+                foreach (HtmlElement input in webBrowser.Document.GetElementsByTagName("button"))
                 {
-                    input.InvokeMember("click");
+                    if (input.GetAttribute("InnerText") == "Войти")
+                    {
+                        input.InvokeMember("click");
+                    }
                 }
+            }
+            catch (NullReferenceException)
+            {
+                MessageBox.Show("Проверьте доступность сайта http://oed.gtrf.ru/ и попробуйте снова.", "Нет доступа к сайту http://oed.gtrf.ru/", MessageBoxButtons.OK, MessageBoxIcon.Warning);
             }
         }
 
-
-        public void FillWebForm(WebBrowser webbrowser, Broadcast broadcast)
+        /// <summary>
+        /// Заполнение web формы данными передаваемой передачи
+        /// </summary>
+        /// <param name="webBrowser"></param>
+        /// <param name="broadcast"></param>
+        public static void FillWebForm(WebBrowser webBrowser, Broadcast broadcast)
         {
 
-            if (webbrowser.Document != null)
+            if (webBrowser.Document != null)
             {
-                webbrowser.Document.GetElementById("title").InnerText = broadcast.Title;
-                webbrowser.Document.GetElementById("date_aired").InnerText = broadcast.DateAired;
+                webBrowser.Document.GetElementById("title").InnerText = broadcast.Title;
+                webBrowser.Document.GetElementById("date_aired").InnerText = broadcast.DateAired;
                 if (broadcast.DateAiredEnd != "-")
-                    webbrowser.Document.GetElementById("date_air_end").InnerText = broadcast.DateAiredEnd;
-                webbrowser.Document.GetElementById("vendor").InnerText = broadcast.Vendor;
-                webbrowser.Document.GetElementById("author").InnerText = broadcast.Author;
-                webbrowser.Document.GetElementById("composer").InnerText = broadcast.Composer;
-                webbrowser.Document.GetElementById("director").InnerText = broadcast.Director;
-                webbrowser.Document.GetElementById("fragments").InnerText = broadcast.Fragments;
-                webbrowser.Document.GetElementById("presenters").InnerText = broadcast.Presenters;
-                webbrowser.Document.GetElementById("guests").InnerText = broadcast.Guests;
+                    webBrowser.Document.GetElementById("date_air_end").InnerText = broadcast.DateAiredEnd;
+                webBrowser.Document.GetElementById("vendor").InnerText = broadcast.Vendor;
+                webBrowser.Document.GetElementById("author").InnerText = broadcast.Author;
+                webBrowser.Document.GetElementById("composer").InnerText = broadcast.Composer;
+                webBrowser.Document.GetElementById("director").InnerText = broadcast.Director;
+                webBrowser.Document.GetElementById("fragments").InnerText = broadcast.Fragments;
+                webBrowser.Document.GetElementById("presenters").InnerText = broadcast.Presenters;
+                webBrowser.Document.GetElementById("guests").InnerText = broadcast.Guests;
                 if (broadcast.BroadcastCountryId != "Россия")
-                    webbrowser.Document.GetElementById("broadcast_country_id").InnerText = broadcast.BroadcastCountryId;
+                    webBrowser.Document.GetElementById("broadcast_country_id").InnerText = broadcast.BroadcastCountryId;
                 if (broadcast.Languages != "Русский")
-                    webbrowser.Document.GetElementById("languages").InnerText = broadcast.Languages;
-                webbrowser.Document.GetElementById("anons").InnerText = broadcast.Anons;
+                    webBrowser.Document.GetElementById("languages").InnerText = broadcast.Languages;
+                webBrowser.Document.GetElementById("anons").InnerText = broadcast.Anons;
 
-                foreach (HtmlElement input in webbrowser.Document.GetElementsByTagName("button"))
+                foreach (HtmlElement input in webBrowser.Document.GetElementsByTagName("button"))
                 {
                     if (input.GetAttribute("InnerText") == "Сохранить")
                     {
@@ -60,10 +72,44 @@ namespace WEBFill.Classes
                 }
             }
 
-            while (webbrowser.ReadyState != WebBrowserReadyState.Complete)
+            while (webBrowser.ReadyState != WebBrowserReadyState.Complete)
             {
                 Application.DoEvents();
             }
         }
+
+        /// <summary>
+        /// Возвращает true, если пользователь авторизован на сайте http://oed.gtrf.ru/, иначе false
+        /// </summary>
+        /// <param name="webBrowser"></param>
+        /// <returns></returns>
+        public static bool CheckForAuthSuccess(WebBrowser webBrowser)
+        {
+
+            var htmlElements = webBrowser.Document.GetElementsByTagName("a").Cast<HtmlElement>()
+                .Where(x => x.InnerText == "Вход");
+
+            return htmlElements?.Count() == 0;
+
+        }
+
+        /// <summary>
+        /// Загрузка изображения CAPTCHA
+        /// </summary>
+        /// <param name="webBrowser"></param>
+        /// <param name="pictureBox"></param>
+        /// <param name="waitForPageCompleted"></param>
+        public static void LoadCaptchaImage(WebBrowser webBrowser, PictureBox pictureBox, Action waitForPageCompleted)
+        {
+            webBrowser.Url = new Uri("http://oed.gtrf.ru/auth");
+
+            waitForPageCompleted?.Invoke();
+
+            var _sourceHtmlText = webBrowser.DocumentText;
+            var offset = _sourceHtmlText.IndexOf("/captcha/", StringComparison.Ordinal);
+            var s = _sourceHtmlText.Substring(offset + 9, 36);
+            pictureBox.ImageLocation = "http://oed.gtrf.ru/captcha/" + s;
+        }
+
     }
 }

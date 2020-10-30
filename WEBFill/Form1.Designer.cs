@@ -104,8 +104,8 @@
             // 
             // webBrowserGTRF
             // 
-            this.webBrowserGTRF.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
+            this.webBrowserGTRF.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
+            | System.Windows.Forms.AnchorStyles.Left)
             | System.Windows.Forms.AnchorStyles.Right)));
             this.webBrowserGTRF.Location = new System.Drawing.Point(106, 30);
             this.webBrowserGTRF.MinimumSize = new System.Drawing.Size(20, 20);
@@ -311,7 +311,6 @@
             this.Controls.Add(this.loadFromExcelButton);
             this.Name = "Form1";
             this.Text = "BroadSend";
-            this.Load += new System.EventHandler(this.Form1_Load);
             ((System.ComponentModel.ISupportInitialize)(this.bindingSource1)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.captchaPictureBox)).EndInit();
             this.captchaGroupBox.ResumeLayout(false);

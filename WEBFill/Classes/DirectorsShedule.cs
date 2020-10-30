@@ -1,6 +1,6 @@
 ﻿namespace WEBFill.Classes
 {
-    public class DirectorsShedule
+    public class DirectorsSchedule
     {
         public string Interval1 { get; set; }
         public string Interval2 { get; set; }

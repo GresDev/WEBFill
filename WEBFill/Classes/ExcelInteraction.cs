@@ -10,9 +10,14 @@ namespace WEBFill.Classes
 {
     public static class ExcelInteraction
     {
-        public static string ExcelFileName { get; set; }
+        private static string _excelFileName;
 
-        public static List<string> GetSheetsName(DataTable schemaDataTable)
+        /// <summary>
+        /// Возвращает список листов в выбранном файле Excel
+        /// </summary>
+        /// <param name="schemaDataTable"></param>
+        /// <returns></returns>
+        private static List<string> GetSheetsName(DataTable schemaDataTable)
         {
             var sheets = new List<string>();
             foreach (var dataRow in schemaDataTable.AsEnumerable())
@@ -22,29 +27,33 @@ namespace WEBFill.Classes
             return sheets;
         }
 
-        
+
+        /// <summary>
+        /// Возвращает список передач, записанных в выбранном файле Excel
+        /// </summary>
+        /// <param name="openFileDialog"></param>
+        /// <param name="selectedExcelFileName"></param>
+        /// <returns></returns>
         public static async Task<List<Broadcast>> LoadListFromExcelAsync(OpenFileDialog openFileDialog, Label selectedExcelFileName)
         {
             List<Broadcast> broadcasts = new List<Broadcast>();
             string connectionString;
             string mp3Directory = @".\mp3\";
 
-            //openFileDialog.FileName = "";
-
             if (openFileDialog.ShowDialog() == DialogResult.OK)
             {
-                ExcelFileName = openFileDialog.FileName;
+                _excelFileName = openFileDialog.FileName;
             }
             else
             {
                 return null;
             }
 
-            switch (Path.GetExtension(ExcelFileName))
+            switch (Path.GetExtension(_excelFileName))
             {
                 case ".xlsx":
                 case ".xls":
-                    connectionString = $"Provider=Microsoft.ACE.OLEDB.12.0; Data Source={ExcelFileName}; Extended Properties=\"Excel 12.0 Xml; HDR=YES; IMEX=1;\"";
+                    connectionString = $"Provider=Microsoft.ACE.OLEDB.12.0; Data Source={_excelFileName}; Extended Properties=\"Excel 12.0 Xml; HDR=YES; IMEX=1;\"";
                     //connectionString = $"Provider=Microsoft.Jet.OLEDB.4.0; Data Source={excelFileName}; Extended Properties=\"Excel 8.0; HDR=YES; IMEX=1\"";
                     break;
                 default:
@@ -74,16 +83,13 @@ namespace WEBFill.Classes
 
                 var broadcastsDataReader = sheetBroadcasts.CreateDataReader();
 
-                //broadcasts.Clear();
-
                 if (broadcastsDataReader.HasRows)
                 {
                     while (await broadcastsDataReader.ReadAsync())
                     {
                         object[] items = new object[broadcastsDataReader.FieldCount];
                         broadcastsDataReader.GetValues(items);
-                        //if (Convert.ToString(items[15]) == "0")
-                        //{
+
                         Broadcast broadcast = new Broadcast
                         {
                             Id = Convert.ToInt16(items[0]),
@@ -111,22 +117,26 @@ namespace WEBFill.Classes
                         }
 
                         broadcasts.Add(broadcast);
-                        //}
                     }
                 }
             }
 
-            selectedExcelFileName.Text = Path.GetFileName(ExcelFileName);
+            selectedExcelFileName.Text = Path.GetFileName(_excelFileName);
 
             return broadcasts;
         }
 
-        public static async Task<Dictionary<string, string>> GetDictionaryAsync(string broadcastFileName, string tableName)
+        /// <summary>
+        /// Возвращает словарь элементов, записаннх на указанном листе выбранного файла Excel
+        /// </summary>
+        /// <param name="tableName"></param>
+        /// <returns></returns>
+        public static async Task<Dictionary<string, string>> GetDictionaryAsync(string tableName)
         {
             Dictionary<string, string> dictionary = new Dictionary<string, string>();
-            string connectionString = $"Provider=Microsoft.ACE.OLEDB.12.0; Data Source={broadcastFileName}; Extended Properties=\"Excel 12.0 Xml; HDR=YES; IMEX=1;\"";
+            string connectionString = $"Provider=Microsoft.ACE.OLEDB.12.0; Data Source={_excelFileName}; Extended Properties=\"Excel 12.0 Xml; HDR=YES; IMEX=1;\"";
             string excelQuery = $"SELECT * FROM [{tableName}$]";
-            //string buffer;
+
             using (OleDbConnection excelConnection = new OleDbConnection(connectionString))
             {
                 await excelConnection.OpenAsync();
@@ -138,7 +148,6 @@ namespace WEBFill.Classes
 
                 while (await sheetDataReader.ReadAsync())
                 {
-                    //buffer = Convert.ToString(sheetDataReader.GetValue(0)).ToLower();
                     dictionary.Add(Convert.ToString(sheetDataReader.GetValue(0)).ToLower(), Convert.ToString(sheetDataReader.GetValue(1)));
                 }
             }
@@ -146,12 +155,17 @@ namespace WEBFill.Classes
             return dictionary;
         }
 
-        public static async Task<Dictionary<string, DirectorsShedule>> GetDirectorSheduleDictionaryAsync(string broadcastFileName, string tableName)
+        /// <summary>
+        /// Возвращает словарь, содержащий расписания звукорежиссеров
+        /// </summary>
+        /// <param name="tableName"></param>
+        /// <returns></returns>
+        public static async Task<Dictionary<string, DirectorsSchedule>> GetDirectorScheduleDictionaryAsync(string tableName)
         {
-            Dictionary<string, DirectorsShedule> dictionary = new Dictionary<string, DirectorsShedule>();
-            string connectionString = $"Provider=Microsoft.ACE.OLEDB.12.0; Data Source={broadcastFileName}; Extended Properties=\"Excel 12.0 Xml; HDR=YES; IMEX=1;\"";
+            Dictionary<string, DirectorsSchedule> dictionary = new Dictionary<string, DirectorsSchedule>();
+            string connectionString = $"Provider=Microsoft.ACE.OLEDB.12.0; Data Source={_excelFileName}; Extended Properties=\"Excel 12.0 Xml; HDR=YES; IMEX=1;\"";
             string excelQuery = $"SELECT * FROM [{tableName}$]";
-            //string buffer;
+
             using (OleDbConnection excelConnection = new OleDbConnection(connectionString))
             {
                 await excelConnection.OpenAsync();
@@ -163,15 +177,14 @@ namespace WEBFill.Classes
 
                 while (await sheetDataReader.ReadAsync())
                 {
-                    //buffer = Convert.ToString(sheetDataReader.GetValue(0)).ToLower();
-                    DirectorsShedule shedule = new DirectorsShedule()
+                    DirectorsSchedule shedule = new DirectorsSchedule()
                     {
                         Interval1 = Convert.ToString(sheetDataReader.GetValue(2)).Trim(),
                         Interval2 = Convert.ToString(sheetDataReader.GetValue(3)).Trim(),
                         Interval3 = Convert.ToString(sheetDataReader.GetValue(4)).Trim(),
                         Interval4 = Convert.ToString(sheetDataReader.GetValue(5)).Trim(),
                     };
-                    //dictionary.Add(Convert.ToString(sheetDataReader.GetValue(0)), shedule);
+
                     dictionary.Add(Convert.ToDateTime(sheetDataReader.GetValue(0)).ToString("dd/MM/yyyy"), shedule);
                 }
             }
@@ -179,31 +192,38 @@ namespace WEBFill.Classes
             return dictionary;
         }
 
+        /// <summary>
+        /// Записывает данные передачи в выбранный файл Excel
+        /// </summary>
+        /// <param name="broadcast"></param>
+        /// <returns></returns>
         public static async Task WriteBroadcastToTableAsync(Broadcast broadcast)
         {
 
-            string connectionString = $"Provider=Microsoft.ACE.OLEDB.12.0; Data Source={ExcelFileName}; Extended Properties=\"Excel 12.0 Xml; HDR=YES; IMEX=3;\"";
-            string excelQuery;
+            string connectionString = $"Provider=Microsoft.ACE.OLEDB.12.0; Data Source={_excelFileName}; Extended Properties=\"Excel 12.0 Xml; HDR=YES; IMEX=3;\"";
 
             using (OleDbConnection excelConnection = new OleDbConnection(connectionString))
             {
                 await excelConnection.OpenAsync();
 
-                excelQuery = $"INSERT INTO [Broadcasts$] (Id, Title, DateAired, DateAiredEnd, Vendor, Author, Composer, Director, Fragments, Presenters, Guests, BroadcastCountryId, Languages, Anons, FileName, Transmitted, [Date], [Time], SHA256) values ({broadcast.Id}, '{broadcast.Title}', '{broadcast.DateAired}', '{broadcast.DateAiredEnd}', '{broadcast.Vendor}', '{broadcast.Author}', '{broadcast.Composer}', '{broadcast.Director}', '{broadcast.Fragments}', '{broadcast.Presenters}', '{broadcast.Guests}', '{broadcast.BroadcastCountryId}', '{broadcast.Languages}', '{broadcast.Anons}', '{broadcast.FileName}', '{broadcast.Transmitted}', '{broadcast.Date}', '{broadcast.Time}', '{broadcast.Sha256}')";
+                string excelQuery = $"INSERT INTO [Broadcasts$] (Id, Title, DateAired, DateAiredEnd, Vendor, Author, Composer, Director, Fragments, Presenters, Guests, BroadcastCountryId, Languages, Anons, FileName, Transmitted, [Date], [Time], SHA256) values ({broadcast.Id}, '{broadcast.Title}', '{broadcast.DateAired}', '{broadcast.DateAiredEnd}', '{broadcast.Vendor}', '{broadcast.Author}', '{broadcast.Composer}', '{broadcast.Director}', '{broadcast.Fragments}', '{broadcast.Presenters}', '{broadcast.Guests}', '{broadcast.BroadcastCountryId}', '{broadcast.Languages}', '{broadcast.Anons}', '{broadcast.FileName}', '{broadcast.Transmitted}', '{broadcast.Date}', '{broadcast.Time}', '{broadcast.Sha256}')";
                 OleDbCommand excelCommand = new OleDbCommand(excelQuery, excelConnection);
                 await excelCommand.ExecuteNonQueryAsync();
             }
         }
 
-        public static void SetTransmittedFlag(string excelFileName, Broadcast broadcast)
+        /// <summary>
+        /// Устанавливает флаг "передано" в файле Excel для переданного выпуска программы
+        /// </summary>
+        /// <param name="broadcast"></param>
+        public static void SetTransmittedFlag(Broadcast broadcast)
         {
-            string connectionString = $"Provider=Microsoft.ACE.OLEDB.12.0; Data Source={excelFileName}; Extended Properties=\"Excel 12.0 Xml; HDR=YES; IMEX=3;\"";
-            string excelQuery;
+            string connectionString = $"Provider=Microsoft.ACE.OLEDB.12.0; Data Source={_excelFileName}; Extended Properties=\"Excel 12.0 Xml; HDR=YES; IMEX=3;\"";
 
             using (OleDbConnection excelConnection = new OleDbConnection(connectionString))
             {
                 excelConnection.Open();
-                excelQuery = $"UPDATE [Broadcasts$] SET Transmitted = '1' WHERE Id = '{broadcast.Id}'";
+                string excelQuery = $"UPDATE [Broadcasts$] SET Transmitted = '1' WHERE Id = '{broadcast.Id}'";
                 OleDbCommand excelCommand = new OleDbCommand(excelQuery, excelConnection);
                 excelCommand.ExecuteNonQuery();
             }
