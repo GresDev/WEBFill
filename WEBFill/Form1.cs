@@ -313,7 +313,7 @@ namespace WEBFill
 
             MessageBox.Show("Таблица заполнена!", "Внимание!", MessageBoxButtons.OK, MessageBoxIcon.Information);
 
-            if (_broadcastsToSend.Any())
+            if (_broadcastsToSend.Any() && _userLoggedIn)
             {
                 startSendingButton.Enabled = true;
             }

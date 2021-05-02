@@ -54,7 +54,7 @@ namespace WEBFill.Classes
                 case ".xlsx":
                 case ".xls":
                     connectionString = $"Provider=Microsoft.ACE.OLEDB.12.0; Data Source={_excelFileName}; Extended Properties=\"Excel 12.0 Xml; HDR=YES; IMEX=1;\"";
-                    //connectionString = $"Provider=Microsoft.Jet.OLEDB.4.0; Data Source={excelFileName}; Extended Properties=\"Excel 8.0; HDR=YES; IMEX=1\"";
+                    //connectionString = $"Provider=Microsoft.Jet.OLEDB.4.0; Data Source={_excelFileName}; Extended Properties=\"Excel 8.0; HDR=YES; IMEX=1\"";
                     break;
                 default:
                     MessageBox.Show("Выберите файл Excel!", "Внимание!", MessageBoxButtons.OK, MessageBoxIcon.Warning);
