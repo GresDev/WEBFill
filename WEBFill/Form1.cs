@@ -11,7 +11,7 @@ namespace WEBFill
     public partial class Form1 : Form
     {
 
-        private const string CurrentYear = "2020";
+        private const string CurrentYear = "2021";
 
         private bool _userLoggedIn;
 
