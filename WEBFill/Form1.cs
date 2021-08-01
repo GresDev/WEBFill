@@ -102,7 +102,7 @@ namespace WEBFill
 
         }
 
-        private void StartSendingButton_Click(object sender, EventArgs e)
+        private async void StartSendingButton_Click(object sender, EventArgs e)
         {
 
             startSendingButton.Enabled = false;
@@ -125,6 +125,15 @@ namespace WEBFill
                     continue;
                 }
 
+                var Sha256ForCurrentFile = await Task.Run(() => Sha256.GetHash(@".\MP3\" + broadcast.FileName));
+
+                if (broadcast.Sha256 != Sha256ForCurrentFile)
+                {
+                    richTextBox1.Text += broadcast.Id + ": " + broadcast.Title + " (" + broadcast.DateAired + ") - не совпадает контрольная сумма! Файл не передан!\n";
+                    richTextBox1.Select(richTextBox1.Text.Length, 0);
+                    richTextBox1.ScrollToCaret();
+                    continue;
+                }
 
                 webBrowserGTRF.Navigate("http://oed.gtrf.ru/materials/edit");
                 WaitForPageCompleted();

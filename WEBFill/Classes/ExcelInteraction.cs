@@ -108,6 +108,7 @@ namespace WEBFill.Classes
                             Anons = Convert.ToString(items[13]),
                             FileName = Convert.ToString(items[14]),
                             Transmitted = Convert.ToString(items[15]),
+                            Sha256 = Convert.ToString(items[18]),
                         };
                         broadcast.FileExists = true;
                         if (!File.Exists(mp3Directory + broadcast.FileName))
