@@ -73,7 +73,7 @@ namespace WEBFill.Classes
         /// <param name="presentersString"></param>
         /// <param name="presenters"></param>
         /// <returns></returns>
-        public static string ParsePresenters(string presentersString)
+        public static string ParsePresenters(string fileName, string presentersString)
         {
             string[] parsedString = presentersString.Split(new char[] { ',', ' ' });
 
@@ -89,7 +89,7 @@ namespace WEBFill.Classes
                 {
                     if (!string.IsNullOrEmpty(presenterName))
                     {
-                        MessageBox.Show($"Псевдоним \"{presenterName}\" не найден в списке авторов!", "Пропущен псевдоним!", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                        MessageBox.Show($"Псевдоним \"{presenterName}\" не найден в списке авторов!\n" + $"Имя файла: \"{fileName}.mp3\"", "Псевдоним автора не найден в списке!", MessageBoxButtons.OK, MessageBoxIcon.Information);
                         Process.GetCurrentProcess().Kill();
                     }
                 }

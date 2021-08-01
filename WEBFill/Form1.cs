@@ -234,7 +234,7 @@ namespace WEBFill
             {
                 string[] mediaInfo = Utils.ParseFileName(fileName, CurrentYear);
 
-                mediaInfo[5] = Utils.ParsePresenters(mediaInfo[5]);
+                mediaInfo[5] = Utils.ParsePresenters(fileName, mediaInfo[5]);
 
                 Broadcast broadcast = new Broadcast()
                 {
