@@ -155,14 +155,17 @@ namespace WEBFill.Classes
                             MessageBox.Show("Некорректная дата!");
                         }
 
-                        parsedString[2] = dateArray[0] + "." + dateArray[1] + "." + currentYear;
+                        //parsedString[2] = dateArray[0] + "." + dateArray[1] + "." + currentYear;
+                        parsedString[2] = dateArray[0] + "." + dateArray[1] + "." + "20" + dateArray[2];
                     }
                     else
                     {
                         parsedString[0] = "combined";
                         string[] combinedDate = dateArray[0].Split(new char[] { '-' });
-                        parsedString[2] = combinedDate[0] + "." + dateArray[1] + "." + currentYear;
-                        parsedString[4] = combinedDate[1] + "." + dateArray[1] + "." + currentYear;
+                        //parsedString[2] = combinedDate[0] + "." + dateArray[1] + "." + currentYear;
+                        //parsedString[4] = combinedDate[1] + "." + dateArray[1] + "." + currentYear;
+                        parsedString[2] = combinedDate[0] + "." + dateArray[1] + "." + "20" + dateArray[2];
+                        parsedString[4] = combinedDate[1] + "." + dateArray[1] + "." + "20" + dateArray[2];
                     }
 
                     string[] timeArray = parsedStringRaw[j + 1].Split(new char[] { '_' });
